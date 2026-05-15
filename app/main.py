@@ -79,6 +79,47 @@ def submit_shipment(weight:float,data:dict[str,Any])->dict[str,Any]:
     }
     return{"id":new_id}
 
+@app.get("/shipment/{field}")
+def get_shipments_field(field:str,id:int)-> dict[str,Any]:
+    return{
+        field: shipments[id][field]
+    }
+
+@app.put("/shipment")
+def shipment_update(id:int,content:str,weight:int,status:str)->dict[Any,Any]:
+    shipments[id]={
+        "content":content,
+        "weight":weight,
+        "status":status,
+    }
+    return shipments[id]
+
+@app.patch("/shipment")
+def patch_update(id:int,
+                 content:str|None=None,
+                 weight:int|None=None,
+                 status:str|None=None):
+    shipment=shipments[id]
+    if content:
+        shipment["content"]=content
+    if weight:
+        shipment['weight']=weight
+    if status:
+        shipment["status"]=status
+ 
+    shipments[id]=shipment
+    return shipment
+
+
+@app.delete("/shipment")
+def delete_shipment(id:int)-> dict[str,str]:
+    shipments.pop(id)
+    return{"details":f"the details off the id {id} is deleted"}
+    
+
+
+
+    
 #custom documentation
 @app.get("/scalar",include_in_schema=False)
 def get_scalar_docs():
