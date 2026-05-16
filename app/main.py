@@ -2,8 +2,10 @@ from fastapi import FastAPI,HTTPException,status
 from scalar_fastapi import get_scalar_api_reference
 from typing import Any
 
-app=FastAPI()
+from .schemas import shipment
 
+app=FastAPI()
+    
 shipments={
     12011:{
         "weight":.4,
@@ -45,7 +47,7 @@ shipments={
 @app.get("/shipment/latest")
 def shipment_latest():
     id=max(shipments.keys())
-    return shipments[id]
+    return (shipments[id],id)
     
     
 @app.get("/shipment")
@@ -61,20 +63,20 @@ def get_shipment(id: int|None=None) -> dict[str,Any]:
     return shipments[id] 
 
 @app.post("/shipment")
-def submit_shipment(weight:float,data:dict[str,Any])->dict[str,Any]:
-    content=data["content"]
+def submit_shipment(body:shipment)->dict[str,Any]:
    
     new_id=max(shipments.keys())+1
 
-    if weight>25:
-        raise HTTPException(
-            status_code=status.HTTP_406_NOT_ACCEPTABLE,
-            detail="weight cant be more than 25 kgs"
-        )
+    # if body.weight>25:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_406_NOT_ACCEPTABLE,
+    #         detail="weight cant be more than 25 kgs"
+    #     )
     
     shipments[new_id]={
-        "content":content,
-        "weight":weight,
+        "content":body.content,
+        "weight":body.weight,
+        "destination":body.destination,
         "status":"passed"
     }
     return{"id":new_id}
